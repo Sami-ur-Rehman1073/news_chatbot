@@ -1,0 +1,32 @@
+# LangChain
+langchain
+langchain-core
+langchain-community
+
+# LangGraph
+langgraph
+
+# Groq
+langchain-groq
+groq
+
+# Search
+ddgs
+
+# Environment Variables
+python-dotenv
+
+# Data Validation
+pydantic
+
+# HTTP Requests
+requests
+
+# Date & Time
+python-dateutil
+
+# Token Counting
+tiktoken
+
+# Utilities
+typing-extensions
