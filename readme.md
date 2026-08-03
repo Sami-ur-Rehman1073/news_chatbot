@@ -99,9 +99,7 @@ news_chatbot/
 │   ├── nodes.py
 │   ├── prompts.py
 │   └── state.py
-│
-├── llm/
-│   └── llm.py
+│  
 │
 ├── search/
 │   ├── duckduckgo_search.py
@@ -112,6 +110,7 @@ news_chatbot/
 │   └── index.html
 │
 └── utils/
+    └── llm.py
 ```
 
 ---
