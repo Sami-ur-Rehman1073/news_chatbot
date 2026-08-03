@@ -19,7 +19,7 @@
             </h1>
 
             <p class="text-blue-100 mt-2">
-                Search the latest news from multiple sources and read AI-generated summaries.
+                This AI assistant provides the latest news and news-related conversations only. General questions outside of news are not supported.
             </p>
 
         </div>
@@ -98,11 +98,6 @@
                             {{ article.published_at }}
                         </span>
 
-                        <span>
-                            <strong>Search Engine:</strong>
-                            {{ article.search_engine }}
-                        </span>
-
                     </div>
 
                     <!-- Summary -->
@@ -118,18 +113,6 @@
 
                     </div>
 
-                    <!-- Read More -->
-                    <div class="mt-6">
-
-                        <a
-                            href="{{ article.url }}"
-                            target="_blank"
-                            class="inline-block bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-lg"
-                        >
-                            Read Full Article
-                        </a>
-
-                    </div>
 
                 </div>
 

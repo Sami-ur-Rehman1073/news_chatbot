@@ -1,15 +1,11 @@
 from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from graph.builder import build_graph
 
 
 app = FastAPI(title="AI News Chatbot")
-
-# Mount static directory (for future CSS/images if needed)
-app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # Templates
 templates = Jinja2Templates(directory="templates")
@@ -25,13 +21,13 @@ async def home(request: Request):
     """
 
     return templates.TemplateResponse(
-        "index.html",
-        {
-            "request": request,
-            "query": "",
-            "articles": []
-        }
-    )
+    request=request,
+    name="index.html",
+    context={
+        "query": "",
+        "articles": []
+    }
+)
 
 
 @app.post("/search", response_class=HTMLResponse)
@@ -67,10 +63,10 @@ async def search_news(
         articles = result.get("summarized_articles", [])
 
         return templates.TemplateResponse(
-            "index.html",
-            {
-                "request": request,
-                "query": query,
+            request=request,
+            name="index.html",
+            context={
+                "query": "",
                 "articles": articles
             }
         )
