@@ -3,31 +3,32 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from graph.builder import build_graph
+from utils.llm import llm
+from prompts.system_prompt import NEWS_SUMMARIZATION_PROMPT
 
 
 app = FastAPI(title="AI News Chatbot")
 
-# Templates
 templates = Jinja2Templates(directory="templates")
 
-# Build LangGraph once at startup
 graph = build_graph()
+
+# Store latest search result (for demo)
+latest_articles = []
 
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    """
-    Display empty search page.
-    """
 
     return templates.TemplateResponse(
-    request=request,
-    name="index.html",
-    context={
-        "query": "",
-        "articles": []
-    }
-)
+        request=request,
+        name="index.html",
+        context={
+            "query": "",
+            "articles": [],
+            "overall_summary": ""
+        }
+    )
 
 
 @app.post("/search", response_class=HTMLResponse)
@@ -35,9 +36,8 @@ async def search_news(
     request: Request,
     query: str = Form(...)
 ):
-    """
-    Execute the LangGraph workflow and display results.
-    """
+
+    global latest_articles
 
     state = {
         "user_query": query,
@@ -60,25 +60,79 @@ async def search_news(
 
         result = graph.invoke(state)
 
-        articles = result.get("summarized_articles", [])
+        latest_articles = result.get("summarized_articles", [])
 
         return templates.TemplateResponse(
             request=request,
             name="index.html",
             context={
-                "query": "",
-                "articles": articles
+                "query": query,
+                "articles": latest_articles,
+                "overall_summary": ""
             }
         )
 
     except Exception as e:
 
         return templates.TemplateResponse(
-            "index.html",
-            {
-                "request": request,
+            request=request,
+            name="index.html",
+            context={
                 "query": query,
                 "articles": [],
+                "overall_summary": "",
                 "error": str(e)
             }
         )
+
+
+@app.post("/summarize-news", response_class=HTMLResponse)
+async def summarize_news(request: Request):
+
+    global latest_articles
+
+    if not latest_articles:
+
+        return templates.TemplateResponse(
+            request=request,
+            name="index.html",
+            context={
+                "query": "",
+                "articles": [],
+                "overall_summary": "No articles available. Please search first."
+            }
+        )
+
+    articles_text = ""
+
+    for i, article in enumerate(latest_articles, start=1):
+
+        articles_text += f"""
+Article {i}
+
+Title: {article['title']}
+
+Summary:
+{article['content']}
+
+"""
+
+    prompt = f"""
+{NEWS_SUMMARIZATION_PROMPT}
+
+News Articles:
+
+{articles_text}
+"""
+
+    response = llm.invoke(prompt)
+
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={
+            "query": "",
+            "articles": latest_articles,
+            "overall_summary": response.content
+        }
+    )
