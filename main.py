@@ -7,23 +7,33 @@ graph = build_graph()
 summary_graph = build_summary_graph()
 
 
-# Initial graph state
 state = {
     "user_query": "",
     "topic": "",
     "search_query": "",
 
+    # Search engine results
     "duckduckgo_articles": [],
     "newsapi_articles": [],
     "gnews_articles": [],
 
+    # Merged articles
     "raw_articles": [],
+
+    # Summarized articles
     "summarized_articles": [],
-    "overall_summary": "",
+
+    # Duplicate indexes returned by the LLM
+    "duplicate_indexes": [],
+
+    # Final articles after duplicate removal
     "final_articles": [],
 
+    # Chat history
     "chat_history": [],
-    "assistant_response": "",
+
+    # Latest assistant response
+    "assistant_response": ""
 }
 
 
@@ -35,7 +45,7 @@ while True:
         print("Goodbye!")
         break
 
-    # Reset state for a new search
+    # Reset state
     state["user_query"] = user_query
     state["topic"] = ""
     state["search_query"] = ""
@@ -46,59 +56,36 @@ while True:
 
     state["raw_articles"] = []
     state["summarized_articles"] = []
-    state["overall_summary"] = ""
+
+    state["duplicate_indexes"] = []
     state["final_articles"] = []
 
-    # Run search workflow
+    # Execute LangGraph
     state = graph.invoke(state)
 
     print("\n")
     print("=" * 100)
-    print("SUMMARIZED ARTICLES")
+    print("FINAL UNIQUE ARTICLES")
     print("=" * 100)
 
-    for index, article in enumerate(state["summarized_articles"], start=1):
+    print(f"\nTotal Articles After Duplicate Removal: {len(state['final_articles'])}")
 
-        print(f"\nArticle {index}")
+    for index, article in enumerate(state["final_articles"], start=1):
+
+        print("\n" + "-" * 100)
+        print(f"Article {index}")
         print("-" * 100)
-        print(f"Title          : {article['title']}")
-        print(f"Source         : {article['source']}")
-        print(f"Published      : {article['published_at']}")
-        print(f"Search Engine  : {article['search_engine']}")
-        print(f"URL            : {article['url']}")
+
+        print(f"Title         : {article['title']}")
+        print(f"Source        : {article['source']}")
+        print(f"Published     : {article['published_at']}")
+
+        if "search_engine" in article:
+            print(f"Search Engine : {article['search_engine']}")
+
+        print(f"URL           : {article['url']}")
+
         print("\nSummary:")
         print(article["content"])
 
     print("\n" + "=" * 100)
-
-    # Ask whether to generate an overall summary
-    choice = input("\nGenerate overall summary? (y/n): ")
-
-    if choice.lower() == "y":
-
-        summary_state = {
-            "user_query": "",
-            "topic": "",
-            "search_query": "",
-
-            "duckduckgo_articles": [],
-            "newsapi_articles": [],
-            "gnews_articles": [],
-
-            "raw_articles": [],
-            "summarized_articles": state["summarized_articles"],
-            "overall_summary": "",
-            "final_articles": [],
-
-            "chat_history": [],
-            "assistant_response": ""
-        }
-
-        summary_state = summary_graph.invoke(summary_state)
-
-        print("\n")
-        print("=" * 100)
-        print("OVERALL NEWS SUMMARY")
-        print("=" * 100)
-        print(summary_state["overall_summary"])
-        print("=" * 100)
