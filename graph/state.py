@@ -28,6 +28,9 @@ class GraphState(TypedDict):
     # Articles after summarization
     summarized_articles: list[dict]
 
+    # Duplicate indexes returned by LLM
+    duplicate_indexes: list[int]
+
     # Overall summary of all articles
     overall_summary: str
 
