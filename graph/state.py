@@ -7,6 +7,7 @@ from langgraph.graph.message import add_messages
 
 
 class GraphState(TypedDict):
+
     # Current user query
     user_query: str
 
@@ -26,6 +27,9 @@ class GraphState(TypedDict):
 
     # Articles after summarization
     summarized_articles: list[dict]
+
+    # Overall summary of all articles
+    overall_summary: str
 
     # Final articles after duplicate removal
     final_articles: list[dict]
