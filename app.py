@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 
 from graph.builder import build_graph
 from utils.llm import llm
-from prompts.system_prompt import NEWS_SUMMARIZATION_PROMPT
+from prompts.system_prompt import OVERALL_SUMMARY_PROMPT
 
 
 app = FastAPI(title="AI News Chatbot")
@@ -118,7 +118,7 @@ Summary:
 """
 
     prompt = f"""
-{NEWS_SUMMARIZATION_PROMPT}
+{OVERALL_SUMMARY_PROMPT}
 
 News Articles:
 
