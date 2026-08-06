@@ -1,7 +1,7 @@
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from graph.state import GraphState
 from utils.llm import llm
-from prompts.system_prompt import TOPIC_EXTRACTION_PROMPT, SEARCH_PROMPT_TEMPLATE, ARTICLE_SUMMARIZATION_PROMPT
+from prompts.system_prompt import TOPIC_EXTRACTION_PROMPT, SEARCH_PROMPT_TEMPLATE, ARTICLE_SUMMARIZATION_PROMPT, OVERALL_SUMMARY_PROMPT
 from search.duckduckgo_search import search_duckduckgo
 from search.newsapi_search import search_newsapi
 from search.gnews_search import search_gnews
@@ -214,3 +214,40 @@ Article URL:
     return {
         "summarized_articles": summarized_articles
     }
+
+
+
+
+
+def overall_summary_node(state: GraphState):
+
+    print("\n===== Overall Summary Node =====")
+
+    article_text = ""
+
+    for i, article in enumerate(state["summarized_articles"], start=1):
+
+        article_text += f"""
+    Article {i}
+
+    Title:
+    {article["title"]}
+
+    Summary:
+    {article["content"]}
+
+    -----------------------------------
+    """
+
+        messages = [
+            SystemMessage(content=OVERALL_SUMMARY_PROMPT),
+            HumanMessage(content=article_text)
+        ]
+
+        response = llm.invoke(messages)
+
+        print("\nOverall summary generated.")
+
+        return {
+            "overall_summary": response.content.strip()
+        }
