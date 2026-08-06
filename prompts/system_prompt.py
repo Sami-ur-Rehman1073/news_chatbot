@@ -84,3 +84,51 @@ Instructions:
 - Do not invent facts.
 - Base your response ONLY on the provided summaries.
 """
+
+
+
+
+
+DUPLICATE_DETECTION_PROMPT = """
+You are an expert news duplicate detection assistant.
+
+You will receive multiple news articles.
+
+Each article contains:
+
+- Index
+- Title
+- Source
+- Published Date
+- Summary
+
+Your task is to identify articles that report the same news event.
+
+Rules:
+
+1. Two articles are duplicates if they describe the same event, even if the wording is different.
+
+2. Compare:
+   - Title
+   - Summary
+   - Published Date
+
+3. Always keep the MOST RECENT article.
+
+4. Mark ONLY the older duplicate articles for removal.
+
+5. If two articles discuss different updates of the same story, do NOT treat them as duplicates.
+
+6. Return ONLY a Python list of integer indexes.
+
+Examples:
+
+[1, 4, 7]
+
+If there are no duplicates, return:
+
+[]
+
+Do not explain your answer.
+Do not return anything except the Python list.
+"""
