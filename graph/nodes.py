@@ -1,7 +1,7 @@
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from graph.state import GraphState
 from utils.llm import llm
-from prompts.system_prompt import TOPIC_EXTRACTION_PROMPT, SEARCH_PROMPT_TEMPLATE, ARTICLE_SUMMARIZATION_PROMPT, OVERALL_SUMMARY_PROMPT
+from prompts.system_prompt import TOPIC_EXTRACTION_PROMPT, SEARCH_PROMPT_TEMPLATE, ARTICLE_SUMMARIZATION_PROMPT, OVERALL_SUMMARY_PROMPT, DUPLICATE_DETECTION_PROMPT
 from search.duckduckgo_search import search_duckduckgo
 from search.newsapi_search import search_newsapi
 from search.gnews_search import search_gnews
@@ -251,3 +251,105 @@ def overall_summary_node(state: GraphState):
         return {
             "overall_summary": response.content.strip()
         }
+
+
+
+
+def duplicate_detection_node(state: GraphState):
+    """
+    Uses the LLM to identify duplicate news articles.
+
+    Input:
+        state["summarized_articles"]
+
+    Output:
+        state["duplicate_indexes"]
+    """
+
+    print("\n===== Duplicate Detection Node =====")
+
+    articles = state["summarized_articles"]
+
+    if len(articles) <= 1:
+        print("Not enough articles for duplicate detection.")
+
+        return {
+            "duplicate_indexes": []
+        }
+
+    article_text = ""
+
+    for index, article in enumerate(articles):
+
+        article_text += f"""
+Article Index: {index}
+
+Title:
+{article["title"]}
+
+Source:
+{article["source"]}
+
+Published Date:
+{article["published_at"]}
+
+Summary:
+{article["content"]}
+
+------------------------------------------------------------
+"""
+
+    messages = [
+        SystemMessage(content=DUPLICATE_DETECTION_PROMPT),
+        HumanMessage(content=article_text)
+    ]
+
+    response = llm.invoke(messages)
+
+    try:
+
+        duplicate_indexes = eval(response.content.strip())
+
+        if not isinstance(duplicate_indexes, list):
+            duplicate_indexes = []
+
+    except Exception:
+
+        duplicate_indexes = []
+
+    print(f"Duplicate Indexes: {duplicate_indexes}")
+
+    return {
+        "duplicate_indexes": duplicate_indexes
+    }
+
+
+
+
+def duplicate_filter_node(state: GraphState):
+    """
+    Removes duplicate articles using the indexes returned
+    by the Duplicate Detection node.
+
+    Stores the remaining unique articles in:
+        state["final_articles"]
+    """
+
+    print("\n===== Duplicate Filter Node =====")
+
+    duplicate_indexes = set(state["duplicate_indexes"])
+
+    final_articles = []
+
+    for index, article in enumerate(state["summarized_articles"]):
+
+        if index not in duplicate_indexes:
+            final_articles.append(article)
+
+    print(f"Original Articles : {len(state['summarized_articles'])}")
+    print(f"Duplicates Removed: {len(duplicate_indexes)}")
+    print(f"Final Articles    : {len(final_articles)}")
+
+    return {
+        "final_articles": final_articles
+    }
