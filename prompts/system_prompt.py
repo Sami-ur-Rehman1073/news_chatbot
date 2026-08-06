@@ -62,3 +62,25 @@ Instructions:
 6. Do not invent information.
 7. Return ONLY the summary.
 """
+
+
+
+
+
+OVERALL_SUMMARY_PROMPT = """
+You are an expert news analyst.
+
+You will receive summaries of multiple news articles.
+
+Your task is to generate ONE overall summary.
+
+Instructions:
+
+- Combine similar information.
+- Remove duplicate facts.
+- Highlight only important events.
+- Keep the response between 150 and 250 words.
+- Use professional English.
+- Do not invent facts.
+- Base your response ONLY on the provided summaries.
+"""
