@@ -1,7 +1,13 @@
 from graph.builder import build_graph
+from graph.summary_builder import build_summary_graph
 
+
+# Build graphs once
 graph = build_graph()
+summary_graph = build_summary_graph()
 
+
+# Initial graph state
 state = {
     "user_query": "",
     "topic": "",
@@ -13,6 +19,7 @@ state = {
 
     "raw_articles": [],
     "summarized_articles": [],
+    "overall_summary": "",
     "final_articles": [],
 
     "chat_history": [],
@@ -28,9 +35,10 @@ while True:
         print("Goodbye!")
         break
 
-    # Reset state for new query
+    # Reset state for a new search
     state["user_query"] = user_query
     state["topic"] = ""
+    state["search_query"] = ""
 
     state["duckduckgo_articles"] = []
     state["newsapi_articles"] = []
@@ -38,8 +46,10 @@ while True:
 
     state["raw_articles"] = []
     state["summarized_articles"] = []
+    state["overall_summary"] = ""
     state["final_articles"] = []
 
+    # Run search workflow
     state = graph.invoke(state)
 
     print("\n")
@@ -60,3 +70,35 @@ while True:
         print(article["content"])
 
     print("\n" + "=" * 100)
+
+    # Ask whether to generate an overall summary
+    choice = input("\nGenerate overall summary? (y/n): ")
+
+    if choice.lower() == "y":
+
+        summary_state = {
+            "user_query": "",
+            "topic": "",
+            "search_query": "",
+
+            "duckduckgo_articles": [],
+            "newsapi_articles": [],
+            "gnews_articles": [],
+
+            "raw_articles": [],
+            "summarized_articles": state["summarized_articles"],
+            "overall_summary": "",
+            "final_articles": [],
+
+            "chat_history": [],
+            "assistant_response": ""
+        }
+
+        summary_state = summary_graph.invoke(summary_state)
+
+        print("\n")
+        print("=" * 100)
+        print("OVERALL NEWS SUMMARY")
+        print("=" * 100)
+        print(summary_state["overall_summary"])
+        print("=" * 100)
