@@ -123,19 +123,57 @@
                     </h3>
 
                     <!-- Metadata -->
-                    <div class="mt-4 flex flex-wrap gap-6 text-sm text-gray-600">
+                        <div class="mt-4 flex flex-wrap items-center gap-6 text-sm text-gray-600">
 
-                        <span>
-                            <strong>Source:</strong>
-                            {{ article.source }}
-                        </span>
+                            <span>
+                                <strong>Source:</strong>
+                                {{ article.source }}
+                            </span>
 
-                        <span>
-                            <strong>Published:</strong>
-                            {{ article.published_at }}
-                        </span>
+                            <span>
+                                <strong>Published:</strong>
+                                {{ article.published_at }}
+                            </span>
 
-                    </div>
+                            <span class="flex items-center gap-2">
+
+                                <strong>Source Credibility:</strong>
+
+                                {% if article.trusted_source %}
+
+                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full font-semibold">
+                                    ✓ Trusted Source
+                                </span>
+
+                                {% else %}
+
+                                <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full font-semibold">
+                                    ⚠ Unverified Source
+                                </span>
+
+                                {% endif %}
+
+                            </span>
+
+                        </div>
+
+
+                        {% if not article.trusted_source %}
+
+                            <div class="mt-5 rounded-lg border border-yellow-300 bg-yellow-50 p-4">
+
+                                <p class="text-sm text-yellow-800">
+
+                                    <strong>Disclaimer:</strong>
+
+                                    This article is from a source that is not currently included in our trusted source list.
+                                    The information may still be accurate, but we recommend verifying it through multiple reputable news organizations.
+
+                                </p>
+
+                            </div>
+
+                            {% endif %}
 
                     <!-- Summary -->
                     <div class="mt-6">
