@@ -1,6 +1,7 @@
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 from graph.state import GraphState
 from utils.llm import llm
+from utils.trusted_sources import TRUSTED_SOURCES
 from prompts.system_prompt import TOPIC_EXTRACTION_PROMPT, SEARCH_PROMPT_TEMPLATE, ARTICLE_SUMMARIZATION_PROMPT, OVERALL_SUMMARY_PROMPT, DUPLICATE_DETECTION_PROMPT
 from search.duckduckgo_search import search_duckduckgo
 from search.newsapi_search import search_newsapi
@@ -352,4 +353,57 @@ def duplicate_filter_node(state: GraphState):
 
     return {
         "final_articles": final_articles
+    }
+
+
+
+
+def source_credibility_node(state: GraphState):
+    """
+    Labels each article as trusted or untrusted based on its source.
+
+    If any trusted source keyword is found within the article's source
+    string, the article is marked as trusted.
+
+    Input:
+        state["raw_articles"]
+
+    Output:
+        state["raw_articles"] with an added field:
+            article["trusted_source"] = True/False
+    """
+
+    print("\n===== Source Credibility Node =====")
+
+    articles = state["raw_articles"]
+
+    trusted_count = 0
+    untrusted_count = 0
+
+    for article in articles:
+
+        source = article.get("source", "").lower().strip()
+
+        is_trusted = any(
+            trusted_source in source
+            for trusted_source in TRUSTED_SOURCES
+        )
+
+        article["trusted_source"] = is_trusted
+
+        if is_trusted:
+            trusted_count += 1
+        else:
+            untrusted_count += 1
+
+        print(
+            f"Source: {article.get('source', 'Unknown')} "
+            f"--> {'Trusted' if is_trusted else 'Untrusted'}"
+        )
+
+    print(f"\nTrusted Articles   : {trusted_count}")
+    print(f"Untrusted Articles : {untrusted_count}")
+
+    return {
+        "raw_articles": articles
     }
